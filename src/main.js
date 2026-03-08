@@ -2,7 +2,7 @@ import * as THREE from "three";
 import { GUI } from "lil-gui";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 
-const colors = {
+const colors_light = {
     background: 0xfdf6e3,
     background_dim: 0xefebd4,
     grey: 0xa6b0a0,
@@ -19,6 +19,22 @@ const colors = {
     bg_purple: 0xfae8e2,
     statusline: 0x93b259
 };
+
+const colors = {
+    background: 0x232A2E,
+    background_dim: 0x232A2E,
+    grey: 0x7A8478,
+    red: 0xE67E80,
+    yellow: 0xDBBC7F,
+    green: 0xA7C080,
+    blue: 0x7FBBB3,
+    purple: 0xD699B6,
+    fg: 0xD3C6AA,
+    statusline: 0xA7C080
+};
+
+let isDarkMode = true;
+let currentColors = colors;
 
 const scene = new THREE.Scene();
 
@@ -104,13 +120,15 @@ scene.add(gridYZBack);
 
 const params = {
 
-    Ex: "1+0j",
+    Ex: "-1+0j",
     Ey: "0+1j",
     Ez: "1+0j",
 
     omega: 2,
 
     showAxes: true,
+
+		showGrid: true,
 
     showPolarPlane: false,
 
@@ -253,7 +271,7 @@ function rebuildPolarPlane(points, scale) {
     const mat = new THREE.MeshBasicMaterial({
         color: colors.bg_green,
         transparent: true,
-        opacity: 0.6,
+        opacity: 0.2,
         side: THREE.DoubleSide
     });
 
@@ -286,9 +304,9 @@ scene.add(projectionArrow);
 const projectionPlane = new THREE.Mesh(
     new THREE.PlaneGeometry(6, 6),
     new THREE.MeshBasicMaterial({
-        color: colors.bg_red,
+        color: colors.green,
         transparent: true,
-        opacity: 0.5,
+        opacity: 0.2,
         side: THREE.DoubleSide
     })
 );
@@ -302,8 +320,7 @@ const connectorLine = new THREE.Line(
     ]),
     new THREE.LineBasicMaterial({
         color: colors.grey,
-        transparent: true,
-        opacity: 0.5
+        transparent: true
     })
 );
 
@@ -331,19 +348,19 @@ function updateProjection(v) {
     if (params.projectionPlane === "xOy") {
         p.z = 0;
         projectionPlane.rotation.set(0, 0, 0);
-        planeColor = colors.bg_blue;
+        planeColor = colors.blue;
         arrowColor = colors.blue;
     }
     if (params.projectionPlane === "xOz") {
         p.y = 0;
         projectionPlane.rotation.set(Math.PI / 2, 0, 0);
-        planeColor = colors.bg_purple;
+        planeColor = colors.purple;
         arrowColor = colors.purple;
     }
     if (params.projectionPlane === "yOz") {
         p.x = 0;
         projectionPlane.rotation.set(0, Math.PI / 2, 0);
-        planeColor = colors.bg_yellow;
+        planeColor = colors.yellow;
         arrowColor = colors.yellow;
     }
 
@@ -411,6 +428,8 @@ function updateCamera() {
 
 const gui = new GUI();
 
+gui.domElement.style.backgroundColor = '#' + currentColors.background_dim.toString(16).padStart(6, '0');
+
 gui.add(params, "Ex").onFinishChange(rebuildPath);
 gui.add(params, "Ey").onFinishChange(rebuildPath);
 gui.add(params, "Ez").onFinishChange(rebuildPath);
@@ -424,6 +443,13 @@ gui.add(params, "showAxes").onChange(v => {
     labelY.visible = v;
     labelZ.visible = v;
 
+});
+
+gui.add(params, "showGrid").onChange(v => {
+
+		gridXYBack.visible = v;
+		gridYZBack.visible = v;
+		gridXZBack.visible = v;
 });
 
 gui.add(params, "showPolarPlane").onChange(rebuildPath);
